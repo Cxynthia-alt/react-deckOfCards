@@ -7,12 +7,17 @@ const DeckOfCard = ({ deck_count }) => {
   const [deckId, setDeckId] = useState(null)
   const [cards, setCards] = useState([])
   const [url, setUrl] = useState(null)
+  const [cardsRemaining, setCardsRemaining] = useState(0)
 
   useEffect(() => {
     axios.get(`${BASE_URL}/new/shuffle/?deck_count=${deck_count}`).then(res => {
       setDeckId(res.data.deck_id)
+      setCardsRemaining(res.data.remaining)
+    }).catch(err => {
+      console.log(err)
+      Error('Error: Failed to create new deck.')
     })
-  }, [])
+  }, [deck_count])
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -32,6 +37,7 @@ const DeckOfCard = ({ deck_count }) => {
       }
     ])
     setUrl(null)
+    setCardsRemaining(cardsRemaining => cardsRemaining - 1)
   }
   useEffect(() => {
     if (url === null) {
@@ -50,9 +56,11 @@ const DeckOfCard = ({ deck_count }) => {
 
   return (
     <div>
-      <form>
-        <button onClick={handleSubmit} disabled={deckId === null}>Gimme a card</button>
-      </form>
+      {cardsRemaining === 0 ? <div>No cards remaining</div> :
+        <form>
+          <button onClick={handleSubmit} disabled={deckId === null}>Gimme a card</button>
+        </form>
+      }
       <div>
         {cards.map(card =>
           <Card image={card.image}
